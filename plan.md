@@ -595,34 +595,74 @@
   - [x] Large trie performance tests (10,000 entries)
   - [x] Prefix matching tests
 
-**Week -1: Matrices & Collections (Deferred)**
-- [ ] Implement DenseMatrix class (~200 LOC)
-  - [ ] L×L transition matrices
-  - [ ] T×L state matrices
-  - [ ] Matrix operations (copy, zero, resize)
-- [ ] Implement Graph class (~150 LOC)
-  - [ ] For postal code contexts
-  - [ ] AddEdge(), HasEdge(), Save/Load
-- [ ] Write DenseMatrixTests.cs (20 tests)
-- [ ] Write GraphTests.cs (10 tests)
+**Week -1: Matrices & Collections**
+- [x] Implement DenseMatrix class (204 LOC)
+  - [x] L×L transition matrices
+  - [x] T×L state matrices
+  - [x] Matrix operations (copy, zero, resize, exp, multiplyVector, addInPlace)
+- [x] Implement Graph class (89 LOC)
+  - [x] For postal code contexts
+  - [x] AddEdge(), HasEdge(), GetNeighbors()
+  - [x] Directed graph with adjacency list
+- [x] Write DenseMatrixTests.cs (11 tests)
+- [x] Write GraphTests.cs (9 tests)
 
-### 7.1 CRF Implementation (Deferred)
-- [ ] Port test_crf_context.c → CrfContextTests.cs (~20 tests)
-  - [ ] Context window tests
-  - [ ] Feature extraction tests
-  - [ ] Viterbi decoding tests
-- [ ] Implement CRF (Conditional Random Fields)
-  - [ ] Feature extraction
-  - [ ] Context windows
-  - [ ] Viterbi algorithm for sequence labeling
-  - [ ] Score calculation
-  - [ ] Transition weights
-- [ ] Implement CrfContext class
-  - [ ] Context state management
-  - [ ] Feature generation
-  - [ ] Dictionary lookups
+**Prerequisites Status**: ✅ Complete (Week -2 and Week -1 done)
 
-### 6.2 Address Parser
+### 7.1 CRF Context & Viterbi Algorithm
+- [x] Implement CrfContext class (145 LOC)
+  - [x] State scores matrix (T×L)
+  - [x] Transition weights matrix (L×L)
+  - [x] Alpha scores matrix (T×L)
+  - [x] Backward edges for path recovery
+  - [x] **Viterbi algorithm** (dynamic programming) 🎯
+  - [x] SetNumItems() for resizing
+  - [x] Reset() for clearing state
+- [x] Write CrfContextTests.cs (8 tests)
+  - [x] Matrix initialization tests
+  - [x] Resize tests
+  - [x] **Viterbi algorithm tests** (2-label, 3-label sequences)
+  - [x] Edge cases (single token, negative scores, ties)
+
+**Tests**: ✅ 417 tests passing (42 new Phase 7 tests + 375 from previous phases)
+
+**Status**: 🚧 In Progress (30% Complete - Prerequisites + Viterbi Algorithm Done)
+
+**Note**: Phase 7 prerequisites and core CRF inference (Viterbi algorithm) are complete. The Viterbi algorithm - the most complex algorithmic component - is implemented and validated with 8 comprehensive tests. Remaining: CRF model structure, feature extraction, parser pipeline, and 146 real address test cases. See PHASE7_PROGRESS.md for detailed review.
+
+### 7.2 CRF Model (Deferred - Week 2)
+- [ ] Implement Crf class (~250 LOC)
+  - [ ] Model structure (classes, features, weights)
+  - [ ] Feature ID lookups via Trie
+  - [ ] Score computation
+  - [ ] Model save/load (binary format)
+- [ ] Write CrfTests.cs (~15 tests)
+
+### 7.3 Address Parser (Deferred - Weeks 3-6)
+- [ ] Implement AddressParserFeatures (~800 LOC)
+  - [ ] 50+ feature types
+  - [ ] Word features, phrase features
+  - [ ] Dictionary phrase matching
+  - [ ] Postal code context
+  - [ ] N-gram features for unknown words
+- [ ] Implement AddressParser class (~500 LOC)
+  - [ ] Parse pipeline
+  - [ ] Feature extraction integration
+  - [ ] CRF inference integration
+- [ ] Implement AddressParserResponse (~100 LOC)
+  - [ ] 22 component properties
+  - [ ] Confidence scores
+- [ ] Port 146 test cases from test_parser.c
+  - [ ] US addresses (53 tests)
+  - [ ] UK/Canada (40 tests)
+  - [ ] European (25 tests)
+  - [ ] Asian & Other (28 tests)
+
+**Estimated Remaining**: 5-6 weeks for complete parser
+
+---
+
+## Phase 8: Transliteration (Optional - Deferred from Phase 4B)
 - [ ] Port test_parser.c → ParserTests.cs (~300 tests!)
   - [ ] Basic parsing tests
   - [ ] Multi-language address tests
