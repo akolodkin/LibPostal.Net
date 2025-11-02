@@ -73,6 +73,33 @@ public class AddressFeatureExtractor
             {
                 features.Add("has_period");
             }
+
+            // N-gram features for longer words (simulate unknown word handling)
+            if (cleanWord.Length >= 6)
+            {
+                // Add prefix/suffix n-grams (3-6 characters)
+                for (int n = 3; n <= Math.Min(6, cleanWord.Length); n++)
+                {
+                    features.Add($"word:prefix{n}={cleanWord.Substring(0, n)}");
+                    if (cleanWord.Length >= n)
+                    {
+                        features.Add($"word:suffix{n}={cleanWord.Substring(cleanWord.Length - n)}");
+                    }
+                }
+            }
+
+            // Hyphenated words - extract sub-words
+            if (cleanWord.Contains('-'))
+            {
+                var parts = cleanWord.Split('-');
+                foreach (var part in parts)
+                {
+                    if (!string.IsNullOrWhiteSpace(part))
+                    {
+                        features.Add($"sub_word={part}");
+                    }
+                }
+            }
         }
 
         // Numeric features
@@ -84,6 +111,16 @@ public class AddressFeatureExtractor
         // Get non-whitespace tokens for context
         var nonWhitespace = tokenized.GetTokensWithoutWhitespace().ToList();
         var currentIdx = nonWhitespace.FindIndex(t => t.Offset == token.Offset);
+
+        // Separator context - check if previous token was a separator
+        if (currentIdx > 0)
+        {
+            var prevToken = nonWhitespace[currentIdx - 1];
+            if (prevToken.Type == TokenType.Comma)
+            {
+                features.Add("after_comma");
+            }
+        }
 
         // Position features (based on non-whitespace position)
         if (currentIdx == 0)
