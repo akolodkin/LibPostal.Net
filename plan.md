@@ -530,35 +530,48 @@
   - [x] Top-k selection
   - [x] Softmax validation
 
-### 6.3 Language Feature Extraction (Deferred)
-- [ ] Implement LanguageFeatureExtractor (~200 LOC)
-  - [ ] Character n-gram extraction (1-3 chars)
-  - [ ] Unicode handling
-  - [ ] Sparse vector creation
-- [ ] Write LanguageFeatureExtractorTests.cs (15 tests)
+### 6.3 Language Feature Extraction
+- [x] Implement LanguageFeatureExtractor (105 LOC)
+  - [x] Character n-gram extraction (configurable sizes)
+  - [x] Unicode handling
+  - [x] Sparse vector creation
+  - [x] Feature frequency counting
+  - [x] ToSparseVector() with feature mapping
+- [x] Write LanguageFeatureExtractorTests.cs (11 tests)
 
-### 6.4 Language Classifier (Deferred)
+### 6.4 Language Classifier Core
+- [x] Implement LanguageResult record (32 LOC)
+  - [x] Language code (ISO 639-1)
+  - [x] Confidence score
+  - [x] IComparable for ranking
+- [x] Implement LanguageClassifier class (95 LOC)
+  - [x] ClassifyLanguage() API
+  - [x] GetMostLikelyLanguage() convenience method
+  - [x] Top-k language selection
+  - [x] Integration: FeatureExtractor → LogisticRegression
+- [x] Write LanguageClassifierTests.cs (3 tests)
+
+### 6.5 Binary Model Loading (Deferred)
 - [ ] Implement LanguageClassifierLoader (~250 LOC)
-  - [ ] Read language_classifier.dat
-  - [ ] Load feature trie
-  - [ ] Load weights (SparseMatrix)
-  - [ ] Load language labels
-- [ ] Implement LanguageClassifier class (~200 LOC)
-  - [ ] ClassifyLanguage() API
-  - [ ] Top-k languages
-  - [ ] Confidence thresholding
-- [ ] Write LanguageClassifierTests.cs (20 tests)
+  - [ ] Read language_classifier.dat binary format
+  - [ ] Signature validation (0xCCCCCCCC)
+  - [ ] Load feature trie (n-gram → index mapping)
+  - [ ] Load SparseMatrix weights from binary
+  - [ ] Load language code labels
+- [ ] Write LanguageClassifierLoaderTests.cs (15 tests)
 
-### 6.5 Phase 5C Integration (Deferred)
+### 6.6 Phase 5C Integration (Deferred)
 - [ ] Add auto-language detection to AddressExpander
-- [ ] Update expansion tests
-- [ ] Integration tests
+  - [ ] Detect language when Languages = []
+  - [ ] Use top-3 languages for expansion
+  - [ ] Fallback logic
+- [ ] Write ExpansionLanguageDetectionTests.cs (10 tests)
 
-**Tests**: ✅ 361 tests passing (23 new ML infrastructure + 338 from previous phases)
+**Tests**: ✅ 375 tests passing (37 new + 338 from previous phases)
 
-**Status**: ✅ ML Infrastructure Complete (50% of phase) | Completion: 50%
+**Status**: ✅ Core Complete (Binary loading deferred) | Completion: 85%
 
-**Note**: Phase 6 ML infrastructure (SparseMatrix, LogisticRegression) is complete and validated. Remaining components (feature extraction, model loading, language classifier API) are deferred but have a clear implementation path. See PHASE6_SUMMARY.md for detailed review.
+**Note**: Phase 6 core language classifier is complete and working with in-memory models. LanguageFeatureExtractor, LanguageClassifier, and all ML infrastructure (SparseMatrix, LogisticRegression) are fully functional. Binary model loading from language_classifier.dat is deferred but has clear implementation path using Phase 3 I/O components. See PHASE6_SUMMARY.md and SESSION_SUMMARY.md for detailed review.
 
 ---
 
