@@ -491,15 +491,78 @@
 - [ ] Auto-detect languages from input
 - [ ] Multi-language expansion with fallback
 
-**Status**: ⏳ Deferred (requires Phase 9 language classifier)
+**Status**: ⏳ Deferred (requires Phase 6 language classifier)
 
 ---
 
-## Phase 6: Data Loading & Dictionary Management (Week 10-11)
+## Phase 6: Language Classifier & ML Infrastructure (Week 10-11)
+
+**Goal**: Implement language detection and ML infrastructure
+
+### 6.1 ML Infrastructure
+- [x] Implement SparseMatrix<T> class (234 LOC)
+  - [x] CSR (Compressed Sparse Row) format
+  - [x] Matrix-vector multiplication
+  - [x] CSR format conversion
+  - [x] FromTuples(), FromCSR() factory methods
+  - [x] Transpose operation
+  - [x] Generic type support (double, float)
+- [x] Write SparseMatrixTests.cs (17 tests)
+  - [x] Construction and bounds checking
+  - [x] Set/get operations
+  - [x] Matrix-vector multiply
+  - [x] CSR conversion
+  - [x] Large sparse matrices (100 x 10,000)
+
+### 6.2 Logistic Regression
+- [x] Implement LogisticRegression class (138 LOC)
+  - [x] Multi-class classification
+  - [x] Sparse weight matrix support
+  - [x] Softmax probability computation
+  - [x] Predict() - class index
+  - [x] PredictProba() - all probabilities
+  - [x] PredictWithLabel() - label + confidence
+  - [x] PredictTopK() - top-k languages
+  - [x] Numerically stable softmax
+- [x] Write LogisticRegressionTests.cs (6 tests)
+  - [x] Prediction tests
+  - [x] Probability computation
+  - [x] Top-k selection
+  - [x] Softmax validation
+
+### 6.3 Language Feature Extraction (Deferred)
+- [ ] Implement LanguageFeatureExtractor (~200 LOC)
+  - [ ] Character n-gram extraction (1-3 chars)
+  - [ ] Unicode handling
+  - [ ] Sparse vector creation
+- [ ] Write LanguageFeatureExtractorTests.cs (15 tests)
+
+### 6.4 Language Classifier (Deferred)
+- [ ] Implement LanguageClassifierLoader (~250 LOC)
+  - [ ] Read language_classifier.dat
+  - [ ] Load feature trie
+  - [ ] Load weights (SparseMatrix)
+  - [ ] Load language labels
+- [ ] Implement LanguageClassifier class (~200 LOC)
+  - [ ] ClassifyLanguage() API
+  - [ ] Top-k languages
+  - [ ] Confidence thresholding
+- [ ] Write LanguageClassifierTests.cs (20 tests)
+
+### 6.5 Phase 5C Integration (Deferred)
+- [ ] Add auto-language detection to AddressExpander
+- [ ] Update expansion tests
+- [ ] Integration tests
+
+**Tests**: ✅ 361 tests passing (23 new ML infrastructure + 338 from previous phases)
+
+**Status**: ✅ ML Infrastructure Complete (50% of phase) | Completion: 50%
+
+**Note**: Phase 6 ML infrastructure (SparseMatrix, LogisticRegression) is complete and validated. Remaining components (feature extraction, model loading, language classifier API) are deferred but have a clear implementation path. See PHASE6_SUMMARY.md for detailed review.
 
 ---
 
-## Phase 6: Address Parsing (Week 10-12)
+## Phase 7: Address Parsing (CRF-based) (Week 12-17)
 
 **Goal**: Implement CRF-based address parsing with component labeling
 
