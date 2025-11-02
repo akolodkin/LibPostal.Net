@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <!-- NuGet Package Metadata -->
+    <PackageId>LibPostal.Net</PackageId>
+    <Version>1.0.0-beta.1</Version>
+    <Authors>LibPostal.Net Contributors</Authors>
+    <Company>LibPostal.Net</Company>
+    <Description>A .NET port of libpostal - fast international street address parsing and normalization using statistical NLP and open data. Parse and normalize addresses from 60+ countries and languages.</Description>
+    <PackageTags>address;parsing;normalization;nlp;geocoding;libpostal;international;openstreetmap</PackageTags>
+    <PackageProjectUrl>https://github.com/yourusername/LibPostal.Net</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/yourusername/LibPostal.Net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

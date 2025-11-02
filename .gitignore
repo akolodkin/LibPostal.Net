@@ -1,0 +1,29 @@
+# .NET Build Outputs
+bin/
+obj/
+out/
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+artifacts/
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts/
+
+# OS Files
+.DS_Store
+Thumbs.db

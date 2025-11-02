@@ -1,0 +1,43 @@
+MIT License
+
+Copyright (c) 2025 LibPostal.Net Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+This software is a .NET port of libpostal (https://github.com/openvenues/libpostal),
+which is also licensed under the MIT License.
+
+The pre-trained models and data files included in the LibPostal.Net.Data package
+are derived from:
+
+1. OpenStreetMap data (© OpenStreetMap contributors)
+   Licensed under the Open Database License (ODbL)
+   https://www.openstreetmap.org/copyright
+
+2. OpenAddresses data
+   Licensed under various open licenses
+   https://openaddresses.io/
+
+3. CLDR (Unicode Common Locale Data Repository)
+   Licensed under Unicode License
+   https://unicode.org/copyright.html
+
+Please refer to the respective licenses for these data sources.

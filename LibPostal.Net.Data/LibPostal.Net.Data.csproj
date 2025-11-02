@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <!-- NuGet Package Metadata -->
+    <PackageId>LibPostal.Net.Data</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>LibPostal.Net Contributors</Authors>
+    <Company>LibPostal.Net</Company>
+    <Description>Pre-trained data files for LibPostal.Net - includes trained models, dictionaries, and language data for international address parsing. Based on libpostal v1.0.0 models. This package is ~2GB and contains data derived from OpenStreetMap and OpenAddresses.</Description>
+    <PackageTags>address;parsing;data;models;libpostal;openstreetmap</PackageTags>
+    <PackageProjectUrl>https://github.com/yourusername/LibPostal.Net</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/yourusername/LibPostal.Net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
