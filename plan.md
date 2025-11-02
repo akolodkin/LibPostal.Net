@@ -579,7 +579,34 @@
 
 **Goal**: Implement CRF-based address parsing with component labeling
 
-### 6.1 CRF Implementation
+### 7.0 Prerequisites (Week -2 to -1)
+
+**Week -2: Enhanced Trie**
+- [x] Implement Trie persistence (Save/Load methods)
+  - [x] Save() to stream with signature validation
+  - [x] Load() from stream with error handling
+  - [x] Generic serialization for uint, int, ulong
+- [x] Implement Trie prefix matching
+  - [x] GetKeysWithPrefix() for phrase matching
+  - [x] ContainsKey() for existence checks
+  - [x] GetAllKeys() for enumeration
+- [x] Write TrieEnhancedTests.cs (14 tests)
+  - [x] Persistence round-trip tests
+  - [x] Large trie performance tests (10,000 entries)
+  - [x] Prefix matching tests
+
+**Week -1: Matrices & Collections (Deferred)**
+- [ ] Implement DenseMatrix class (~200 LOC)
+  - [ ] L×L transition matrices
+  - [ ] T×L state matrices
+  - [ ] Matrix operations (copy, zero, resize)
+- [ ] Implement Graph class (~150 LOC)
+  - [ ] For postal code contexts
+  - [ ] AddEdge(), HasEdge(), Save/Load
+- [ ] Write DenseMatrixTests.cs (20 tests)
+- [ ] Write GraphTests.cs (10 tests)
+
+### 7.1 CRF Implementation (Deferred)
 - [ ] Port test_crf_context.c → CrfContextTests.cs (~20 tests)
   - [ ] Context window tests
   - [ ] Feature extraction tests
