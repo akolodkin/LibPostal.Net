@@ -624,19 +624,31 @@
   - [x] **Viterbi algorithm tests** (2-label, 3-label sequences)
   - [x] Edge cases (single token, negative scores, ties)
 
-**Tests**: ✅ 417 tests passing (42 new Phase 7 tests + 375 from previous phases)
+**Tests**: ✅ 431 tests passing (56 new Phase 7 tests + 375 from previous phases)
 
-**Status**: 🚧 In Progress (30% Complete - Prerequisites + Viterbi Algorithm Done)
+**Status**: 🚧 In Progress (50% Complete - CRF Model Complete! ✅)
 
-**Note**: Phase 7 prerequisites and core CRF inference (Viterbi algorithm) are complete. The Viterbi algorithm - the most complex algorithmic component - is implemented and validated with 8 comprehensive tests. Remaining: CRF model structure, feature extraction, parser pipeline, and 146 real address test cases. See PHASE7_PROGRESS.md for detailed review.
+**Note**: Phase 7 prerequisites, CRF inference (Viterbi algorithm), and CRF model are complete and validated! The Viterbi algorithm (most complex) and Crf model (with serialization) are fully functional with 22 comprehensive tests. The CRF system can now perform end-to-end inference from features to label predictions. Remaining: Feature extraction (50+ types), parser pipeline integration, and 146 real address test cases. See PHASE7_PROGRESS.md and FINAL_SESSION_SUMMARY.md for detailed review.
 
-### 7.2 CRF Model (Deferred - Week 2)
-- [ ] Implement Crf class (~250 LOC)
-  - [ ] Model structure (classes, features, weights)
-  - [ ] Feature ID lookups via Trie
-  - [ ] Score computation
-  - [ ] Model save/load (binary format)
-- [ ] Write CrfTests.cs (~15 tests)
+### 7.2 CRF Model ✅ COMPLETE (Week 2)
+- [x] Implement Crf class (324 LOC)
+  - [x] Model structure (classes, features, weights)
+  - [x] Feature management (AddStateFeature, AddStateTransFeature)
+  - [x] Weight management (SetWeight, GetWeight, SetTransWeight)
+  - [x] Feature ID lookups via Trie<uint>
+  - [x] Score computation (ScoreToken method)
+  - [x] Integration with CrfContext
+  - [x] PrepareForInference() and Predict() methods
+  - [x] Model save/load (binary format, signature 0xCFCFCFCF)
+  - [x] Round-trip serialization validated
+  - [x] IDisposable pattern
+- [x] Write CrfTests.cs (14 tests)
+  - [x] Constructor and initialization (2 tests)
+  - [x] Feature management (3 tests)
+  - [x] Transition features (2 tests)
+  - [x] Binary serialization (4 tests)
+  - [x] Integration tests (3 tests)
+  - [x] End-to-end inference test ✅
 
 ### 7.3 Address Parser (Deferred - Weeks 3-6)
 - [ ] Implement AddressParserFeatures (~800 LOC)
