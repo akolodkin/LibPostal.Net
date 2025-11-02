@@ -624,11 +624,11 @@
   - [x] **Viterbi algorithm tests** (2-label, 3-label sequences)
   - [x] Edge cases (single token, negative scores, ties)
 
-**Tests**: ✅ 431 tests passing (56 new Phase 7 tests + 375 from previous phases)
+**Tests**: ✅ 454 tests passing (79 new Phase 7 tests + 375 from previous phases)
 
-**Status**: 🚧 In Progress (50% Complete - CRF Model Complete! ✅)
+**Status**: 🚧 In Progress (60% Complete - Feature Extraction Started! ✅)
 
-**Note**: Phase 7 prerequisites, CRF inference (Viterbi algorithm), and CRF model are complete and validated! The Viterbi algorithm (most complex) and Crf model (with serialization) are fully functional with 22 comprehensive tests. The CRF system can now perform end-to-end inference from features to label predictions. Remaining: Feature extraction (50+ types), parser pipeline integration, and 146 real address test cases. See PHASE7_PROGRESS.md and FINAL_SESSION_SUMMARY.md for detailed review.
+**Note**: Phase 7 prerequisites, CRF inference (Viterbi algorithm), CRF model, and feature extraction foundation are complete and validated! The Viterbi algorithm (most complex), Crf model (with serialization), and basic feature extraction (word, numeric, position, context) are fully functional with 79 comprehensive tests. The CRF system can now perform end-to-end inference from features to label predictions. Remaining: Dictionary/phrase features (Week 2), postal code features (Week 3), parser pipeline integration, and 146 real address test cases. See PHASE7_PROGRESS.md, PHASE7_3_SUMMARY.md, and FINAL_SESSION_SUMMARY.md for detailed review.
 
 ### 7.2 CRF Model ✅ COMPLETE (Week 2)
 - [x] Implement Crf class (324 LOC)
@@ -650,13 +650,56 @@
   - [x] Integration tests (3 tests)
   - [x] End-to-end inference test ✅
 
-### 7.3 Address Parser (Deferred - Weeks 3-6)
-- [ ] Implement AddressParserFeatures (~800 LOC)
-  - [ ] 50+ feature types
-  - [ ] Word features, phrase features
-  - [ ] Dictionary phrase matching
-  - [ ] Postal code context
-  - [ ] N-gram features for unknown words
+### 7.3 Feature Extraction (In Progress - Week 1/3 Complete)
+
+**Week 1: Foundation & Basic Features** ✅ COMPLETE
+- [x] Implement Feature record (32 LOC)
+  - [x] Feature name and value representation
+- [x] Implement FeatureVector class (64 LOC)
+  - [x] Feature collection management
+  - [x] Add(), Contains(), ToArray(), Clear()
+- [x] Implement AddressFeatureExtractor class (117 LOC)
+  - [x] Basic infrastructure
+  - [x] Bias feature (always present)
+  - [x] Word features (word, word_length)
+  - [x] Capitalization features (is_capitalized, is_all_caps)
+  - [x] Punctuation features (has_period)
+  - [x] Numeric features (is_numeric)
+  - [x] Position features (position=first, position=last)
+  - [x] Context window features (prev_word, next_word, bigrams)
+  - [x] Whitespace handling
+- [x] Write FeatureInfrastructureTests.cs (10 tests)
+- [x] Write BasicFeatureTests.cs (13 tests)
+
+**Week 2: Dictionary & Phrase Features** (Deferred)
+- [ ] Dictionary phrase features (~150 LOC)
+  - [ ] phrase:street, phrase:name, phrase:unit, phrase:level
+  - [ ] Integration with AddressDictionaryReader
+  - [ ] Phrase type detection
+- [ ] Component phrase features (~100 LOC)
+  - [ ] component:city, component:state, component:country
+  - [ ] Component dictionary lookups
+- [ ] Unknown word n-grams (~100 LOC)
+  - [ ] word:prefix3-6, word:suffix3-6
+  - [ ] For vocabulary OOV handling
+- [ ] Write 35 tests for dictionary/phrase features
+
+**Week 3: Postal Code & Advanced Features** (Deferred)
+- [ ] Postal code context features (~100 LOC)
+  - [ ] postcode_has_context, postcode_no_context
+  - [ ] Graph-based postal code → admin region matching
+- [ ] Separator features (~50 LOC)
+  - [ ] has_comma, has_semicolon, after_comma, before_newline
+- [ ] Prefix/suffix features (~80 LOC)
+  - [ ] prefix={prefix}, suffix={suffix}
+  - [ ] Street affixes (d', l', straße, gasse)
+- [ ] Hyphenated word features (~70 LOC)
+  - [ ] sub_word={word} for each hyphenated part
+- [ ] Write 20 tests for postal/advanced features
+
+**Estimated Remaining**: 2 weeks, ~55 tests, ~550 LOC
+
+### 7.4 Address Parser Pipeline (Deferred - After 7.3)
 - [ ] Implement AddressParser class (~500 LOC)
   - [ ] Parse pipeline
   - [ ] Feature extraction integration
