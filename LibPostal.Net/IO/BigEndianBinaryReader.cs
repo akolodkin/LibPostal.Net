@@ -81,6 +81,23 @@ public sealed class BigEndianBinaryReader : IDisposable
     }
 
     /// <summary>
+    /// Reads an 8-byte double in big-endian byte order (IEEE 754 format).
+    /// </summary>
+    /// <returns>The value read from the stream.</returns>
+    /// <exception cref="EndOfStreamException">Thrown when the end of stream is reached.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when the reader has been disposed.</exception>
+    public double ReadDouble()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        var bytesRead = _stream.Read(_buffer, 0, 8);
+        if (bytesRead != 8)
+            throw new EndOfStreamException("Unable to read 8 bytes from stream.");
+
+        return BitConverter.Int64BitsToDouble(BinaryPrimitives.ReadInt64BigEndian(_buffer));
+    }
+
+    /// <summary>
     /// Reads a single byte from the stream.
     /// </summary>
     /// <returns>The byte read from the stream.</returns>
@@ -166,6 +183,81 @@ public sealed class BigEndianBinaryReader : IDisposable
 
         var bytes = ReadBytes((int)length);
         return Encoding.UTF8.GetString(bytes);
+    }
+
+    /// <summary>
+    /// Reads an array of doubles in big-endian byte order.
+    /// </summary>
+    /// <param name="count">The number of doubles to read.</param>
+    /// <returns>An array of doubles read from the stream.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="count"/> is negative.</exception>
+    /// <exception cref="EndOfStreamException">Thrown when the end of stream is reached before reading all values.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when the reader has been disposed.</exception>
+    public double[] ReadDoubleArray(int count)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+
+        if (count == 0)
+            return Array.Empty<double>();
+
+        var result = new double[count];
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = ReadDouble();
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Reads an array of 32-bit unsigned integers in big-endian byte order.
+    /// </summary>
+    /// <param name="count">The number of uint32 values to read.</param>
+    /// <returns>An array of uint32 values read from the stream.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="count"/> is negative.</exception>
+    /// <exception cref="EndOfStreamException">Thrown when the end of stream is reached before reading all values.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when the reader has been disposed.</exception>
+    public uint[] ReadUInt32Array(int count)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+
+        if (count == 0)
+            return Array.Empty<uint>();
+
+        var result = new uint[count];
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = ReadUInt32();
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Reads an array of 64-bit unsigned integers in big-endian byte order.
+    /// </summary>
+    /// <param name="count">The number of uint64 values to read.</param>
+    /// <returns>An array of uint64 values read from the stream.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="count"/> is negative.</exception>
+    /// <exception cref="EndOfStreamException">Thrown when the end of stream is reached before reading all values.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when the reader has been disposed.</exception>
+    public ulong[] ReadUInt64Array(int count)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+
+        if (count == 0)
+            return Array.Empty<ulong>();
+
+        var result = new ulong[count];
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = ReadUInt64();
+        }
+
+        return result;
     }
 
     /// <summary>

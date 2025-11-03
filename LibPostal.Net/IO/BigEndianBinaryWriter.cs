@@ -69,6 +69,20 @@ public sealed class BigEndianBinaryWriter : IDisposable
     }
 
     /// <summary>
+    /// Writes an 8-byte double in big-endian byte order (IEEE 754 format).
+    /// </summary>
+    /// <param name="value">The value to write.</param>
+    /// <exception cref="ObjectDisposedException">Thrown when the writer has been disposed.</exception>
+    public void WriteDouble(double value)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        var longValue = BitConverter.DoubleToInt64Bits(value);
+        BinaryPrimitives.WriteInt64BigEndian(_buffer, longValue);
+        _stream.Write(_buffer, 0, 8);
+    }
+
+    /// <summary>
     /// Writes a single byte to the stream.
     /// </summary>
     /// <param name="value">The byte to write.</param>
@@ -124,6 +138,57 @@ public sealed class BigEndianBinaryWriter : IDisposable
         var bytes = Encoding.UTF8.GetBytes(value);
         WriteUInt32((uint)bytes.Length);
         _stream.Write(bytes, 0, bytes.Length);
+    }
+
+    /// <summary>
+    /// Writes an array of doubles in big-endian byte order.
+    /// </summary>
+    /// <param name="values">The array of doubles to write.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is null.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when the writer has been disposed.</exception>
+    public void WriteDoubleArray(double[] values)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            WriteDouble(values[i]);
+        }
+    }
+
+    /// <summary>
+    /// Writes an array of 32-bit unsigned integers in big-endian byte order.
+    /// </summary>
+    /// <param name="values">The array of uint32 values to write.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is null.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when the writer has been disposed.</exception>
+    public void WriteUInt32Array(uint[] values)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            WriteUInt32(values[i]);
+        }
+    }
+
+    /// <summary>
+    /// Writes an array of 64-bit unsigned integers in big-endian byte order.
+    /// </summary>
+    /// <param name="values">The array of uint64 values to write.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is null.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when the writer has been disposed.</exception>
+    public void WriteUInt64Array(ulong[] values)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            WriteUInt64(values[i]);
+        }
     }
 
     /// <summary>
