@@ -290,4 +290,184 @@ public class RealAddressValidationTests
     }
 
     #endregion
+
+    #region Additional US Address Variations
+
+    [Fact]
+    public void Parse_USAddress_WithBoulevard_ShouldExtractCorrectly()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "456 Ocean Boulevard, Miami FL 33139";
+        var result = _parser.Parse(address);
+
+        result.GetComponent("house_number").Should().Be("456");
+        result.GetComponent("road").Should().Contain("ocean");
+        result.GetComponent("city").Should().Contain("miami");
+        result.GetComponent("state").Should().Be("fl");
+        result.GetComponent("postcode").Should().Be("33139");
+    }
+
+    [Fact]
+    public void Parse_USAddress_WithDrive_ShouldExtractCorrectly()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "789 Park Drive, Seattle WA 98101";
+        var result = _parser.Parse(address);
+
+        result.GetComponent("house_number").Should().Be("789");
+        result.GetComponent("road").Should().Contain("park");
+        result.GetComponent("city").Should().Contain("seattle");
+        result.GetComponent("state").Should().Be("wa");
+    }
+
+    [Fact]
+    public void Parse_USAddress_WithDirectional_ShouldExtractCorrectly()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "100 North Main Street, Chicago IL 60601";
+        var result = _parser.Parse(address);
+
+        result.GetComponent("house_number").Should().Be("100");
+        result.GetComponent("road").Should().MatchRegex("north.*main|main");
+        result.GetComponent("city").Should().Contain("chicago");
+        result.GetComponent("state").Should().Be("il");
+    }
+
+    [Fact]
+    public void Parse_USAddress_Massachusetts_ShouldExtractCorrectly()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "1 Main Street, Boston MA 02108";
+        var result = _parser.Parse(address);
+
+        result.GetComponent("house_number").Should().Be("1");
+        result.GetComponent("city").Should().Contain("boston");
+        result.GetComponent("state").Should().Be("ma");
+        result.GetComponent("postcode").Should().Be("02108");
+    }
+
+    [Fact]
+    public void Parse_USAddress_Texas_ShouldExtractCorrectly()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "500 Congress Avenue, Austin TX 78701";
+        var result = _parser.Parse(address);
+
+        result.GetComponent("house_number").Should().Be("500");
+        result.GetComponent("road").Should().Contain("congress");
+        result.GetComponent("city").Should().Contain("austin");
+        result.GetComponent("state").Should().Be("tx");
+    }
+
+    #endregion
+
+    #region Additional International Addresses
+
+    [Fact]
+    public void Parse_SpanishAddress_ShouldExtractCorrectly()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "Calle Mayor 10, 28013 Madrid, España";
+        var result = _parser.Parse(address);
+
+        result.GetComponent("road").Should().Contain("mayor");
+        result.GetComponent("house_number").Should().Be("10");
+        result.GetComponent("postcode").Should().Be("28013");
+        result.GetComponent("city").Should().Contain("madrid");
+    }
+
+    [Fact]
+    public void Parse_ItalianAddress_ShouldExtractCorrectly()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "Via Roma 123, 00100 Roma, Italia";
+        var result = _parser.Parse(address);
+
+        result.GetComponent("road").Should().Contain("roma");
+        result.GetComponent("house_number").Should().Be("123");
+        result.GetComponent("postcode").Should().Be("00100");
+        result.GetComponent("city").Should().Contain("roma");
+    }
+
+    [Fact]
+    public void Parse_AustralianAddress_ShouldExtractCorrectly()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "123 George Street, Sydney NSW 2000, Australia";
+        var result = _parser.Parse(address);
+
+        result.GetComponent("house_number").Should().Be("123");
+        result.GetComponent("road").Should().Contain("george");
+        result.GetComponent("city").Should().Contain("sydney");
+        result.GetComponent("state").Should().Be("nsw");
+        result.GetComponent("postcode").Should().Be("2000");
+    }
+
+    #endregion
+
+    #region Complex Scenarios
+
+    [Fact]
+    public void Parse_AddressWithFloor_ShouldExtractLevel()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "Floor 3, 123 Main Street, New York NY 10001";
+        var result = _parser.Parse(address);
+
+        var components = string.Join(" ", result.Components);
+        components.Should().MatchRegex("(floor|3)");
+        result.GetComponent("house_number").Should().Be("123");
+    }
+
+    [Fact]
+    public void Parse_AddressWithHashUnit_ShouldExtractUnit()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "#5, 123 Main Street, Brooklyn NY 11216";
+        var result = _parser.Parse(address);
+
+        var components = string.Join(" ", result.Components);
+        components.Should().Contain("5");
+        result.GetComponent("house_number").Should().Be("123");
+    }
+
+    [Fact]
+    public void Parse_LongComplexAddress_ShouldHandleGracefully()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "The Empire State Building, 350 Fifth Avenue, Suite 7000, New York NY 10118, United States";
+        var result = _parser.Parse(address);
+
+        result.Should().NotBeNull();
+        result.GetComponent("house_number").Should().Be("350");
+        result.GetComponent("road").Should().Contain("fifth");
+        result.GetComponent("city").Should().Contain("new york");
+    }
+
+    [Fact]
+    public void Parse_AddressWithAbbreviations_ShouldExpand()
+    {
+        if (!_modelsAvailable || _parser == null) return;
+
+        var address = "123 Main St, NYC NY 10001";
+        var result = _parser.Parse(address);
+
+        result.GetComponent("house_number").Should().Be("123");
+        result.GetComponent("road").Should().Contain("main");
+        result.GetComponent("state").Should().Be("ny");
+        result.GetComponent("postcode").Should().Be("10001");
+    }
+
+    #endregion
 }

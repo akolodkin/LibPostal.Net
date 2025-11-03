@@ -113,19 +113,39 @@ public struct ComponentPhraseTypes
 }
 
 /// <summary>
-/// Component phrase boundary types matching libpostal's address_parser_boundary_type_t
+/// Component phrase boundary types matching libpostal's address_parser_boundary_type_t.
+/// Represents geographic/administrative boundaries for component phrases (cities, states, countries, etc.).
 /// </summary>
 [Flags]
 public enum ComponentPhraseBoundary : ushort
 {
+    /// <summary>No boundary type</summary>
     None = 0,
+
+    /// <summary>Suburb or neighborhood level (e.g., "Brooklyn Heights", "Williamsburg")</summary>
     Suburb = 1 << 3,
+
+    /// <summary>City district level (e.g., "Manhattan", "Queens")</summary>
     CityDistrict = 1 << 4,
+
+    /// <summary>City level (e.g., "New York", "London", "Paris")</summary>
     City = 1 << 5,
+
+    /// <summary>Island level (e.g., "Sicily", "Manhattan Island")</summary>
     Island = 1 << 7,
+
+    /// <summary>State district level (e.g., "Bavaria", "Catalonia")</summary>
     StateDistrict = 1 << 8,
+
+    /// <summary>State/province level (e.g., "New York", "California", "Ontario")</summary>
     State = 1 << 9,
+
+    /// <summary>Country region level (e.g., "New England", "Provence")</summary>
     CountryRegion = 1 << 11,
+
+    /// <summary>Country level (e.g., "USA", "UK", "France")</summary>
     Country = 1 << 13,
+
+    /// <summary>World region level (e.g., "Europe", "Asia", "North America")</summary>
     WorldRegion = 1 << 14
 }
