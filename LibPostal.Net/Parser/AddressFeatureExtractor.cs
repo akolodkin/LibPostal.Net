@@ -196,6 +196,13 @@ public class AddressFeatureExtractor
             AddDictionaryPhraseFeatures(features, dictPhrase, context);
         }
 
+        // Add component phrase features (cities, states, countries)
+        var componentPhrase = context.GetComponentPhraseAt(tokenIndex);
+        if (componentPhrase != null && context.Tokenized == tokenized)
+        {
+            AddComponentPhraseFeatures(features, componentPhrase, context);
+        }
+
         // Add prefix/suffix features if no phrase match
         // This handles per-token prefix/suffix detection (like German "hinter-", "-straße")
         if (dictPhrase == null && token.Type == TokenType.Word && context.Model.Phrases != null)
@@ -360,6 +367,117 @@ public class AddressFeatureExtractor
             AddressComponent.City => "city",
             AddressComponent.State => "state",
             AddressComponent.Postcode => "postcode",
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Adds component phrase features (cities, states, countries, etc.)
+    /// Based on libpostal's address_parser.c lines 1200-1260
+    /// </summary>
+    private void AddComponentPhraseFeatures(FeatureVector features, PhraseMatch phrase, AddressParserContext context)
+    {
+        var model = context.Model;
+
+        // Add generic phrase feature
+        features.Add($"phrase:{phrase.PhraseText}");
+
+        // Get component types if available
+        if (model.ComponentPhraseTypes == null || phrase.PhraseId >= model.ComponentPhraseTypes.Length)
+        {
+            return;
+        }
+
+        var types = model.ComponentPhraseTypes[phrase.PhraseId];
+        var components = (ComponentPhraseBoundary)types.Components;
+        var mostCommonBoundary = GetBoundaryFromOrdinal(types.MostCommon);
+
+        // Add component-specific features using helper
+        AddComponentFeature(features, components, ComponentPhraseBoundary.Suburb, "suburb", phrase.PhraseText);
+        AddComponentFeature(features, components, ComponentPhraseBoundary.City, "city", phrase.PhraseText);
+        AddComponentFeature(features, components, ComponentPhraseBoundary.CityDistrict, "city_district", phrase.PhraseText);
+        AddComponentFeature(features, components, ComponentPhraseBoundary.Island, "island", phrase.PhraseText);
+        AddComponentFeature(features, components, ComponentPhraseBoundary.StateDistrict, "state_district", phrase.PhraseText);
+        AddComponentFeature(features, components, ComponentPhraseBoundary.State, "state", phrase.PhraseText);
+        AddComponentFeature(features, components, ComponentPhraseBoundary.CountryRegion, "country_region", phrase.PhraseText);
+        AddComponentFeature(features, components, ComponentPhraseBoundary.Country, "country", phrase.PhraseText);
+        AddComponentFeature(features, components, ComponentPhraseBoundary.WorldRegion, "world_region", phrase.PhraseText);
+
+        // Add "commonly X" feature if most common differs from current components
+        // This happens when phrase is ambiguous but has a statistically most common type
+        var isAmbiguous = (components & (components - 1)) != 0; // More than one bit set
+        var mostCommonIsInComponents = (components & mostCommonBoundary) != 0;
+
+        if (isAmbiguous && mostCommonIsInComponents && mostCommonBoundary != ComponentPhraseBoundary.None)
+        {
+            var commonlyType = GetComponentBoundaryName(mostCommonBoundary);
+            if (!string.IsNullOrEmpty(commonlyType))
+            {
+                features.Add($"commonly {commonlyType}:{phrase.PhraseText}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Converts ordinal enum value to ComponentPhraseBoundary bitmask.
+    /// </summary>
+    private static ComponentPhraseBoundary GetBoundaryFromOrdinal(ushort ordinal)
+    {
+        // Map enum ordinals to bit positions
+        // 0 = None, 1 = Suburb (1<<3), 2 = CityDistrict (1<<4), etc.
+        return ordinal switch
+        {
+            0 => ComponentPhraseBoundary.None,
+            1 => ComponentPhraseBoundary.Suburb,
+            2 => ComponentPhraseBoundary.CityDistrict,
+            3 => ComponentPhraseBoundary.City,
+            4 => ComponentPhraseBoundary.StateDistrict,
+            5 => ComponentPhraseBoundary.Island,
+            6 => ComponentPhraseBoundary.State,
+            7 => ComponentPhraseBoundary.CountryRegion,
+            8 => ComponentPhraseBoundary.Country,
+            9 => ComponentPhraseBoundary.WorldRegion,
+            _ => ComponentPhraseBoundary.None
+        };
+    }
+
+    /// <summary>
+    /// Helper to add component phrase features (matches libpostal's add_phrase_features logic)
+    /// </summary>
+    private static void AddComponentFeature(FeatureVector features, ComponentPhraseBoundary phraseComponents,
+        ComponentPhraseBoundary targetComponent, string componentName, string phraseText)
+    {
+        if (phraseComponents == targetComponent)
+        {
+            // Unambiguous: only this component type
+            features.Add($"unambiguous phrase type:{componentName}");
+            features.Add($"unambiguous phrase type+phrase:{componentName}:{phraseText}");
+        }
+        else if ((phraseComponents & targetComponent) != 0)
+        {
+            // Ambiguous: this component is one of multiple
+            features.Add($"phrase:{componentName}");
+            features.Add($"phrase type+phrase:{componentName}:{phraseText}");
+        }
+    }
+
+    /// <summary>
+    /// Gets component boundary name from enum value.
+    /// </summary>
+    private static string? GetComponentBoundaryName(ComponentPhraseBoundary boundary)
+    {
+        // Handle single-bit enum values
+        return boundary switch
+        {
+            ComponentPhraseBoundary.Suburb => "suburb",
+            ComponentPhraseBoundary.City => "city",
+            ComponentPhraseBoundary.CityDistrict => "city_district",
+            ComponentPhraseBoundary.Island => "island",
+            ComponentPhraseBoundary.StateDistrict => "state_district",
+            ComponentPhraseBoundary.State => "state",
+            ComponentPhraseBoundary.CountryRegion => "country_region",
+            ComponentPhraseBoundary.Country => "country",
+            ComponentPhraseBoundary.WorldRegion => "world_region",
             _ => null
         };
     }

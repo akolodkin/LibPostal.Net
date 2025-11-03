@@ -73,7 +73,20 @@ public class AddressParserContext
         }
 
         // Search for component phrases (cities, states, etc.)
-        // Not yet implemented in model - would use separate trie
+        if (_model.ComponentPhrases != null)
+        {
+            var componentMatcher = new PhraseMatcher(_model.ComponentPhrases);
+
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                var matches = componentMatcher.SearchTokens(tokens, i, normalized: true);
+
+                foreach (var match in matches)
+                {
+                    _componentPhraseMembership.AssignPhrase(match);
+                }
+            }
+        }
 
         // Search for postal code phrases
         if (_model.PostalCodes != null)
