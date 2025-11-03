@@ -48,6 +48,34 @@ public class AddressParser
     }
 
     /// <summary>
+    /// Loads an address parser using the default data directory.
+    /// First checks environment variable LIBPOSTAL_DATA_DIR, then uses ~/.libpostal
+    /// </summary>
+    /// <returns>A new AddressParser instance.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when models are not found in default directory.</exception>
+    public static AddressParser LoadDefault()
+    {
+        var dataDir = Environment.GetEnvironmentVariable("LIBPOSTAL_DATA_DIR");
+
+        if (string.IsNullOrEmpty(dataDir))
+        {
+            var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            dataDir = Path.Combine(userProfile, ".libpostal");
+        }
+
+        var parserDir = Path.Combine(dataDir, "address_parser");
+        if (!Directory.Exists(parserDir))
+        {
+            throw new InvalidOperationException(
+                $"LibPostal models not found at {dataDir}. " +
+                "Please install LibPostal.Net.Data package or download models manually. " +
+                "See: https://github.com/openvenues/libpostal");
+        }
+
+        return LoadFromDirectory(dataDir);
+    }
+
+    /// <summary>
     /// Loads an address parser from a data directory.
     /// </summary>
     /// <param name="dataDirectory">The directory containing model files.</param>

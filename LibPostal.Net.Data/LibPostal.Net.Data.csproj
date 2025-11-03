@@ -11,17 +11,31 @@
     <Version>1.0.0</Version>
     <Authors>LibPostal.Net Contributors</Authors>
     <Company>LibPostal.Net</Company>
-    <Description>Pre-trained data files for LibPostal.Net - includes trained models, dictionaries, and language data for international address parsing. Based on libpostal v1.0.0 models. This package is ~2GB and contains data derived from OpenStreetMap and OpenAddresses.</Description>
-    <PackageTags>address;parsing;data;models;libpostal;openstreetmap</PackageTags>
+    <Description>Model downloader for LibPostal.Net. Auto-downloads ~2GB of pre-trained models on first build from GitHub Releases. Includes: address parser CRF model, vocabulary, phrases, and language classifier. Models cached in ~/.libpostal for reuse. Based on libpostal v1.0.0 models trained on OpenStreetMap and OpenAddresses data.</Description>
+    <PackageTags>address;parsing;data;models;libpostal;openstreetmap;downloader</PackageTags>
     <PackageProjectUrl>https://github.com/yourusername/LibPostal.Net</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/yourusername/LibPostal.Net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- Don't include model files in package - they'll be downloaded -->
+    <NoWarn>$(NoWarn);NU5100</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />
+
+    <!-- Include download scripts as tools -->
+    <None Include="tools\download-models.ps1" Pack="true" PackagePath="tools\" />
+    <None Include="tools\download-models.sh" Pack="true" PackagePath="tools\" />
+
+    <!-- Include versions manifest as content -->
+    <None Include="content\versions.json" Pack="true" PackagePath="content\" />
+
+    <!-- Include MSBuild integration -->
+    <None Include="build\LibPostal.Net.Data.props" Pack="true" PackagePath="build\" Condition="Exists('build\LibPostal.Net.Data.props')" />
+    <None Include="build\LibPostal.Net.Data.targets" Pack="true" PackagePath="build\" Condition="Exists('build\LibPostal.Net.Data.targets')" />
   </ItemGroup>
 
 </Project>

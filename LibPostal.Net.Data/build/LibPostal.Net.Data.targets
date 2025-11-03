@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Auto-download LibPostal models on first build -->
+  <Target Name="DownloadLibPostalModels"
+          BeforeTargets="BeforeBuild"
+          Condition="'$(LibPostalAutoDownload)' == 'true' And '$(DesignTimeBuild)' != 'true'">
+
+    <PropertyGroup>
+      <!-- Check if parser model exists -->
+      <ParserModelPath>$(LibPostalDataDir)\address_parser\address_parser_crf.dat</ParserModelPath>
+      <ParserModelPath Condition="'$(OS)' != 'Windows_NT'">$(LibPostalDataDir)/address_parser/address_parser_crf.dat</ParserModelPath>
+
+      <!-- Get script directory from package -->
+      <LibPostalScriptDir>$(MSBuildThisFileDirectory)..\tools</LibPostalScriptDir>
+    </PropertyGroup>
+
+    <!-- Download models if they don't exist -->
+    <Exec Condition="!Exists('$(ParserModelPath)') And '$(OS)' == 'Windows_NT'"
+          Command="pwsh -ExecutionPolicy Bypass -File &quot;$(LibPostalScriptDir)\download-models.ps1&quot; -DataDir &quot;$(LibPostalDataDir)&quot; -Version &quot;$(LibPostalModelVersion)&quot; -Component &quot;$(LibPostalComponents)&quot;"
+          ContinueOnError="WarnAndContinue"
+          IgnoreExitCode="false" />
+
+    <Exec Condition="!Exists('$(ParserModelPath)') And '$(OS)' != 'Windows_NT'"
+          Command="bash &quot;$(LibPostalScriptDir)/download-models.sh&quot; --data-dir &quot;$(LibPostalDataDir)&quot; --version &quot;$(LibPostalModelVersion)&quot; &quot;$(LibPostalComponents)&quot;"
+          ContinueOnError="WarnAndContinue"
+          IgnoreExitCode="false" />
+
+    <!-- Warn if models still missing after download attempt -->
+    <Warning Condition="!Exists('$(ParserModelPath)')"
+             Text="LibPostal models not found at $(LibPostalDataDir). Auto-download may have failed. Please run download script manually or set LibPostalAutoDownload=false." />
+
+    <Message Condition="Exists('$(ParserModelPath)')"
+             Text="LibPostal models available at: $(LibPostalDataDir)"
+             Importance="normal" />
+
+  </Target>
+
+</Project>

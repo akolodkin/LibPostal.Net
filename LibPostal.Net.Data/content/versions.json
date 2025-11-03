@@ -1,0 +1,38 @@
+{
+  "current": "v1.0.0",
+  "versions": {
+    "v1.0.0": {
+      "released": "2017-04-07",
+      "components": {
+        "parser": {
+          "url": "https://github.com/openvenues/libpostal/releases/download/v1.0.0/parser.tar.gz",
+          "size": 1932735283,
+          "extractDir": "address_parser",
+          "requiredFiles": [
+            "address_parser_crf.dat",
+            "address_parser_vocab.trie",
+            "address_parser_phrases.dat",
+            "address_parser_postal_codes.dat"
+          ]
+        },
+        "language_classifier": {
+          "url": "https://github.com/openvenues/libpostal/releases/download/v1.0.0/language_classifier.tar.gz",
+          "size": 209715200,
+          "extractDir": "language_classifier",
+          "requiredFiles": [
+            "language_classifier.dat"
+          ]
+        },
+        "base": {
+          "url": "https://github.com/openvenues/libpostal/releases/download/v1.0.0/libpostal_data.tar.gz",
+          "size": 1932735283,
+          "extractDir": ".",
+          "requiredFiles": [
+            "numex",
+            "address_expansions"
+          ]
+        }
+      }
+    }
+  }
+}

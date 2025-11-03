@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- Default data directory in user profile -->
+    <LibPostalDataDir Condition="'$(LibPostalDataDir)' == '' And '$(OS)' == 'Windows_NT'">$(USERPROFILE)\.libpostal</LibPostalDataDir>
+    <LibPostalDataDir Condition="'$(LibPostalDataDir)' == '' And '$(OS)' != 'Windows_NT'">$(HOME)/.libpostal</LibPostalDataDir>
+
+    <!-- Enable auto-download by default (can be disabled by user) -->
+    <LibPostalAutoDownload Condition="'$(LibPostalAutoDownload)' == ''">true</LibPostalAutoDownload>
+
+    <!-- Model version -->
+    <LibPostalModelVersion Condition="'$(LibPostalModelVersion)' == ''">v1.0.0</LibPostalModelVersion>
+
+    <!-- Components to download (parser by default) -->
+    <LibPostalComponents Condition="'$(LibPostalComponents)' == ''">parser</LibPostalComponents>
+  </PropertyGroup>
+
+  <!-- Make LibPostalDataDir available to source code -->
+  <ItemGroup>
+    <CompilerVisibleProperty Include="LibPostalDataDir" />
+  </ItemGroup>
+
+</Project>
