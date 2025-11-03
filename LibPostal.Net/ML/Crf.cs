@@ -334,14 +334,17 @@ public class Crf : IDisposable
         var classesStr = System.Text.Encoding.UTF8.GetString(classesBytes);
         var classes = classesStr.Split('\0', StringSplitOptions.RemoveEmptyEntries);
 
-        // Load all components using libpostal double-array trie format
-        var stateFeatures = DoubleArrayTrieLoader.LoadLibpostalTrie<uint>(stream);
+        // Load state features trie - detect format by peeking at signature
+        var stateFeatures = LoadTrieWithFormatDetection<uint>(stream);
 
-        var weights = LoadSparseWeightsFromStream(stream, numClasses);
+        // Load state weights - detect format by checking if dimensions are present
+        var weights = LoadSparseWeightsWithFormatDetection(stream, numClasses);
 
-        var stateTransFeatures = DoubleArrayTrieLoader.LoadLibpostalTrie<uint>(stream);
+        // Load state transition features trie
+        var stateTransFeatures = LoadTrieWithFormatDetection<uint>(stream);
 
-        var stateTransWeights = LoadSparseWeightsFromStream(stream, numClasses * numClasses);
+        // Load state transition weights
+        var stateTransWeights = LoadSparseWeightsWithFormatDetection(stream, numClasses * numClasses);
 
         var transWeights = new DenseMatrix(numClasses, numClasses);
         LoadDenseMatrix(stream, transWeights);
@@ -366,6 +369,63 @@ public class Crf : IDisposable
         writer.WriteUInt32((uint)values.Length);
         foreach (var val in values)
             writer.WriteUInt64(BitConverter.DoubleToUInt64Bits(val));
+    }
+
+    /// <summary>
+    /// Loads trie with automatic format detection (libpostal double-array vs simple format).
+    /// </summary>
+    private static Trie<TData> LoadTrieWithFormatDetection<TData>(Stream stream) where TData : struct
+    {
+        // Peek at signature to determine format (without disposing reader)
+        long position = stream.Position;
+        byte[] signatureBytes = new byte[4];
+        int bytesRead = stream.Read(signatureBytes, 0, 4);
+        stream.Position = position; // Reset
+
+        if (bytesRead < 4)
+        {
+            // Empty or too small - use simple format
+            return Trie<TData>.Load(stream);
+        }
+
+        uint signature = (uint)((signatureBytes[0] << 24) | (signatureBytes[1] << 16) |
+                               (signatureBytes[2] << 8) | signatureBytes[3]);
+
+        if (signature == 0xABABABAB)
+        {
+            // Libpostal double-array trie format
+            return DoubleArrayTrieLoader.LoadLibpostalTrie<TData>(stream);
+        }
+        else
+        {
+            // Our simple trie format (includes 0x00000000 for empty tries)
+            return Trie<TData>.Load(stream);
+        }
+    }
+
+    /// <summary>
+    /// Loads sparse weights with automatic format detection.
+    /// </summary>
+    private static SparseMatrix<double> LoadSparseWeightsWithFormatDetection(Stream stream, int expectedCols)
+    {
+        // Peek ahead to check if libpostal format (has m, n dimensions)
+        long position = stream.Position;
+        byte[] dimBytes = new byte[8];
+        stream.Read(dimBytes, 0, 8);
+        uint m = (uint)((dimBytes[0] << 24) | (dimBytes[1] << 16) | (dimBytes[2] << 8) | dimBytes[3]);
+        uint n = (uint)((dimBytes[4] << 24) | (dimBytes[5] << 16) | (dimBytes[6] << 8) | dimBytes[7]);
+        stream.Position = position; // Reset
+
+        // If both m and n are reasonable, use libpostal format
+        if (m > 0 && m < 100000000 && n > 0 && n < 10000)
+        {
+            return LoadSparseWeightsFromStream(stream, expectedCols);
+        }
+
+        // Simple format (no dimensions at start)
+        var matrix = new SparseMatrix<double>(rows: 10000, cols: expectedCols);
+        LoadSparseWeights(stream, matrix);
+        return matrix;
     }
 
     /// <summary>

@@ -56,7 +56,7 @@ public class RealAddressValidationTests
         result.GetComponent("postcode").Should().Be("11216");
     }
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_USAddress_WithUnit_ShouldExtractUnit()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -76,7 +76,7 @@ public class RealAddressValidationTests
         result.GetComponent("postcode").Should().Be("11216");
     }
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_USAddress_POBox_ShouldExtractPOBox()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -94,7 +94,7 @@ public class RealAddressValidationTests
         result.GetComponent("postcode").Should().Be("10001");
     }
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_USAddress_WithSuite_ShouldExtractSuite()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -114,7 +114,7 @@ public class RealAddressValidationTests
         result.GetComponent("postcode").Should().Be("90013");
     }
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_USAddress_VenueName_ShouldExtractVenue()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -138,7 +138,7 @@ public class RealAddressValidationTests
 
     #region International Addresses
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_UKAddress_ShouldParseCorrectly()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -157,7 +157,7 @@ public class RealAddressValidationTests
         result.GetComponent("country").Should().Contain("uk");
     }
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_CanadianAddress_ShouldParseCorrectly()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -176,7 +176,7 @@ public class RealAddressValidationTests
         result.GetComponent("postcode").Should().MatchRegex("m5b.*1m4");
     }
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_GermanAddress_ShouldParseCorrectly()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -194,7 +194,7 @@ public class RealAddressValidationTests
         result.GetComponent("city").Should().Contain("berlin");
     }
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_FrenchAddress_ShouldParseCorrectly()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -216,7 +216,7 @@ public class RealAddressValidationTests
 
     #region Edge Cases
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_AddressWithoutPostcode_ShouldParseRemaining()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -234,7 +234,7 @@ public class RealAddressValidationTests
         result.GetComponent("state").Should().Be("ny");
     }
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_AddressWithoutHouseNumber_ShouldParseRemaining()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -252,7 +252,7 @@ public class RealAddressValidationTests
         result.GetComponent("postcode").Should().Be("11216");
     }
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_VeryShortAddress_ShouldHandleGracefully()
     {
         if (!_modelsAvailable || _parser == null) return;
@@ -270,7 +270,7 @@ public class RealAddressValidationTests
         result.Components.Should().Contain(c => c.Contains("brooklyn") || c.Contains("ny"));
     }
 
-    [Fact(Skip = "Requires real models")]
+    [Fact]
     public void Parse_ComplexAddress_WithMultipleUnits_ShouldParse()
     {
         if (!_modelsAvailable || _parser == null) return;

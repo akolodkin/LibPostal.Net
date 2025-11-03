@@ -141,6 +141,7 @@ public static class DoubleArrayTrieLoader
         var node = nodes[nodeId];
 
         // Check if this is a terminal node (negative base)
+        // In libpostal, terminal nodes have base < 0, pointing to data array
         if (node.Base < 0)
         {
             var dataIndex = -node.Base - 1;
@@ -158,21 +159,29 @@ public static class DoubleArrayTrieLoader
 
                 // Add to result trie
                 var data = ConvertData<TData>(dataNode.Data);
-                result.Add(key, data);
+                if (!string.IsNullOrEmpty(key))
+                {
+                    result.Add(key, data);
+                }
             }
             return; // Terminal node - don't continue traversal
         }
 
-        // Non-terminal node - try all alphabet characters
+        // Non-terminal node - traverse children
+        // In double-array trie: next_node = base[current] + char_code
+        // Valid if check[next_node] == current
         for (int i = 0; i < alphabet.Length; i++)
         {
             var ch = (char)alphabet[i];
-            var nextNodeId = node.Base + i + 1; // +1 for alpha_map offset
+            // Calculate next node: base + (alphabet_index + 1)
+            // The +1 is because alpha_map reserves 0 for special purposes
+            var nextNodeId = node.Base + i + 1;
 
             if (nextNodeId >= 0 && nextNodeId < nodes.Length)
             {
                 var nextNode = nodes[nextNodeId];
-                if (nextNode.Check == nodeId) // Valid transition
+                // Verify this is a valid transition
+                if (nextNode.Check == nodeId)
                 {
                     currentKey.Append(ch);
                     Traverse(nextNodeId, nodes, dataNodes, tail, alphabet, currentKey, result);
