@@ -129,7 +129,7 @@ public class DictionaryPhraseFeatureTests
 
         // Assert
         features.Should().Contain("phrase:unit");
-        features.Should().Contain("unambiguous phrase type=unit");
+        features.Should().Contain("unambiguous phrase type:unit");
     }
 
     [Fact]
