@@ -2,25 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
 
-    <!-- NuGet Package Metadata -->
+    <!-- NuGet Package Metadata (project-specific) -->
     <PackageId>LibPostal.Net.Data</PackageId>
-    <Version>1.0.0</Version>
-    <Authors>LibPostal.Net Contributors</Authors>
-    <Company>LibPostal.Net</Company>
-    <Description>Model downloader for LibPostal.Net. Auto-downloads ~2GB of pre-trained models on first build from GitHub Releases. Includes: address parser CRF model, vocabulary, phrases, and language classifier. Models cached in ~/.libpostal for reuse. Based on libpostal v1.0.0 models trained on OpenStreetMap and OpenAddresses data.</Description>
+    <Description>Model downloader for LibPostal.Net. Auto-downloads ~2GB of pre-trained models on first build from GitHub Releases. Includes: address parser CRF model (968MB), vocabulary (95MB), phrases (132MB), and postal codes (593MB). Models cached in ~/.libpostal for reuse across projects. Based on libpostal v1.0.0 models trained on 1B+ addresses from OpenStreetMap and OpenAddresses.</Description>
     <PackageTags>address;parsing;data;models;libpostal;openstreetmap;downloader</PackageTags>
-    <PackageProjectUrl>https://github.com/yourusername/LibPostal.Net</PackageProjectUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/yourusername/LibPostal.Net</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>See https://github.com/akolodkin/LibPostal.Net/blob/main/CHANGELOG.md for full release notes.</PackageReleaseNotes>
 
     <!-- Don't include model files in package - they'll be downloaded -->
     <NoWarn>$(NoWarn);NU5100</NoWarn>
+
+    <!-- Common properties inherited from Directory.Build.props:
+         Version, Authors, Company, Copyright, RepositoryUrl, PackageProjectUrl,
+         PackageLicenseExpression, RepositoryType, LangVersion, Nullable,
+         ImplicitUsings, PackageIcon -->
   </PropertyGroup>
 
   <ItemGroup>

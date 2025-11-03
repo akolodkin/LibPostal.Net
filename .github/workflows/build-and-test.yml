@@ -1,3 +1,6 @@
+# Continuous Integration workflow - runs on every push/PR to main/develop branches
+# For releases, see release.yml which is triggered by version tags
+
 name: Build and Test
 
 on:

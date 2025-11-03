@@ -1,0 +1,50 @@
+<Project>
+  <PropertyGroup>
+    <!-- Version Configuration -->
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionSuffix>beta.1</VersionSuffix>
+
+    <!-- Package Metadata -->
+    <Authors>LibPostal.Net Contributors</Authors>
+    <Company>LibPostal.Net</Company>
+    <Copyright>Copyright © 2025 LibPostal.Net Contributors</Copyright>
+
+    <!-- Repository Configuration -->
+    <RepositoryUrl>https://github.com/akolodkin/LibPostal.Net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/akolodkin/LibPostal.Net</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <!-- Source Link Configuration -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <!-- Symbol Packages -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Build Configuration -->
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Deterministic Builds -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- Package Icon (shared across all packages) -->
+  <!-- TODO: Uncomment after converting icon.svg to icon.png (128x128) -->
+  <!-- See ICON_README.md for conversion instructions -->
+  <!--
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+  -->
+
+  <!-- SourceLink Package Reference (for all projects) -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

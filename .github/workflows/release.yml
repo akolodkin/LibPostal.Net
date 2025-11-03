@@ -1,0 +1,277 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on version tags like v1.0.0-beta.1, v1.0.0, etc.
+  workflow_dispatch: # Allow manual trigger
+    inputs:
+      tag:
+        description: 'Tag to release (e.g., v1.0.0-beta.1)'
+        required: true
+        type: string
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  CONFIGURATION: 'Release'
+
+jobs:
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Need full history for version validation
+
+    - name: Extract version from tag
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          TAG="${{ inputs.tag }}"
+        else
+          TAG="${GITHUB_REF#refs/tags/}"
+        fi
+        VERSION="${TAG#v}" # Remove 'v' prefix
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Releasing version: $VERSION"
+
+    - name: Validate version format
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+          echo "Invalid version format: $VERSION"
+          echo "Expected format: X.Y.Z or X.Y.Z-prerelease (e.g., 1.0.0-beta.1)"
+          exit 1
+        fi
+        echo "Version format valid: $VERSION"
+
+    - name: Check CHANGELOG entry
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
+          echo "Warning: No CHANGELOG.md entry found for version $VERSION"
+          echo "Please add release notes to CHANGELOG.md"
+          exit 1
+        fi
+        echo "CHANGELOG entry found for version $VERSION"
+
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
+
+  build-and-test:
+    name: Build and Test
+    needs: validate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: true # Stop if any platform fails
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build solution
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+
+    - name: Run tests
+      run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
+
+  package:
+    name: Package NuGet Packages
+    needs: [validate, build-and-test]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build solution
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+
+    - name: Pack LibPostal.Net
+      run: dotnet pack LibPostal.Net/LibPostal.Net.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./packages
+
+    - name: Pack LibPostal.Net.Data
+      run: dotnet pack LibPostal.Net.Data/LibPostal.Net.Data.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./packages
+
+    - name: List packages
+      run: ls -lh ./packages/
+
+    - name: Upload packages as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./packages/*.nupkg
+        retention-days: 30
+
+    - name: Upload symbol packages as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: symbol-packages
+        path: ./packages/*.snupkg
+        retention-days: 30
+
+  publish-nuget:
+    name: Publish to NuGet.org
+    needs: [validate, package]
+    runs-on: ubuntu-latest
+    environment: production # Requires manual approval (configure in GitHub)
+
+    steps:
+    - name: Download packages
+      uses: actions/download-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./packages
+
+    - name: Download symbol packages
+      uses: actions/download-artifact@v4
+      with:
+        name: symbol-packages
+        path: ./packages
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Publish LibPostal.Net to NuGet
+      run: |
+        dotnet nuget push ./packages/LibPostal.Net.*.nupkg \
+          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
+
+    - name: Publish LibPostal.Net.Data to NuGet
+      run: |
+        dotnet nuget push ./packages/LibPostal.Net.Data.*.nupkg \
+          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
+
+  create-release:
+    name: Create GitHub Release
+    needs: [validate, publish-nuget]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download packages
+      uses: actions/download-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./packages
+
+    - name: Download symbol packages
+      uses: actions/download-artifact@v4
+      with:
+        name: symbol-packages
+        path: ./packages
+
+    - name: Extract release notes
+      id: release_notes
+      run: |
+        VERSION="${{ needs.validate.outputs.version }}"
+
+        # Extract release notes from CHANGELOG.md
+        awk "/## \[$VERSION\]/,/## \[/" CHANGELOG.md | sed '1d;$d' > release-notes.md
+
+        # Add header
+        echo "# LibPostal.NET $VERSION" > release-body.md
+        echo "" >> release-body.md
+        echo "**Release Date:** $(date +'%Y-%m-%d')" >> release-body.md
+        echo "" >> release-body.md
+
+        # Add package links
+        echo "## 📦 NuGet Packages" >> release-body.md
+        echo "" >> release-body.md
+        echo "- [LibPostal.Net](https://www.nuget.org/packages/LibPostal.Net/$VERSION)" >> release-body.md
+        echo "- [LibPostal.Net.Data](https://www.nuget.org/packages/LibPostal.Net.Data/$VERSION)" >> release-body.md
+        echo "" >> release-body.md
+
+        # Add installation instructions
+        echo "## 📥 Installation" >> release-body.md
+        echo "" >> release-body.md
+        echo '```bash' >> release-body.md
+        echo "dotnet add package LibPostal.Net --version $VERSION" >> release-body.md
+        echo "dotnet add package LibPostal.Net.Data --version $VERSION" >> release-body.md
+        echo '```' >> release-body.md
+        echo "" >> release-body.md
+
+        # Add release notes content
+        cat release-notes.md >> release-body.md
+
+        # Add footer
+        echo "" >> release-body.md
+        echo "---" >> release-body.md
+        echo "**Full Changelog**: https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md" >> release-body.md
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ needs.validate.outputs.tag }}
+        name: LibPostal.NET ${{ needs.validate.outputs.version }}
+        body_path: release-body.md
+        draft: false
+        prerelease: ${{ contains(needs.validate.outputs.version, '-') }}
+        files: |
+          ./packages/*.nupkg
+          ./packages/*.snupkg
+          LICENSE
+          README.md
+          CHANGELOG.md
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  announce:
+    name: Post-Release Announcement
+    needs: [validate, create-release]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create announcement
+      run: |
+        VERSION="${{ needs.validate.outputs.version }}"
+        echo "🎉 LibPostal.NET $VERSION has been released!"
+        echo ""
+        echo "📦 NuGet: https://www.nuget.org/packages/LibPostal.Net/$VERSION"
+        echo "📝 Release Notes: https://github.com/${{ github.repository }}/releases/tag/${{ needs.validate.outputs.tag }}"
+        echo ""
+        echo "Thank you to all contributors!"
+
+    - name: Notify (placeholder)
+      run: |
+        echo "Add notification integrations here:"
+        echo "- Discord webhook"
+        echo "- Slack notification"
+        echo "- Twitter/X post"
+        echo "- Reddit r/dotnet post"
