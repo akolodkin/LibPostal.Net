@@ -334,16 +334,14 @@ public class Crf : IDisposable
         var classesStr = System.Text.Encoding.UTF8.GetString(classesBytes);
         var classes = classesStr.Split('\0', StringSplitOptions.RemoveEmptyEntries);
 
-        // Load all components
-        var stateFeatures = Trie<uint>.Load(stream);
+        // Load all components using libpostal double-array trie format
+        var stateFeatures = DoubleArrayTrieLoader.LoadLibpostalTrie<uint>(stream);
 
-        var weights = new SparseMatrix<double>(rows: 10000, cols: numClasses);
-        LoadSparseWeights(stream, weights);
+        var weights = LoadSparseWeightsFromStream(stream, numClasses);
 
-        var stateTransFeatures = Trie<uint>.Load(stream);
+        var stateTransFeatures = DoubleArrayTrieLoader.LoadLibpostalTrie<uint>(stream);
 
-        var stateTransWeights = new SparseMatrix<double>(rows: 10000, cols: numClasses * numClasses);
-        LoadSparseWeights(stream, stateTransWeights);
+        var stateTransWeights = LoadSparseWeightsFromStream(stream, numClasses * numClasses);
 
         var transWeights = new DenseMatrix(numClasses, numClasses);
         LoadDenseMatrix(stream, transWeights);
@@ -368,6 +366,42 @@ public class Crf : IDisposable
         writer.WriteUInt32((uint)values.Length);
         foreach (var val in values)
             writer.WriteUInt64(BitConverter.DoubleToUInt64Bits(val));
+    }
+
+    /// <summary>
+    /// Loads sparse weights from stream and creates matrix with correct size.
+    /// Based on libpostal's sparse_matrix_read() in sparse_matrix.c lines 318-393.
+    /// </summary>
+    private static SparseMatrix<double> LoadSparseWeightsFromStream(Stream stream, int expectedCols)
+    {
+        using var reader = new BigEndianBinaryReader(stream);
+
+        // Read dimensions (these are in the file!)
+        var m = (int)reader.ReadUInt32();  // Number of rows
+        var n = (int)reader.ReadUInt32();  // Number of columns
+
+        // Read indptr array
+        var indptrLen = reader.ReadUInt64();
+        var rowPtr = new int[indptrLen];
+        for (int i = 0; i < (int)indptrLen; i++)
+            rowPtr[i] = (int)reader.ReadUInt32();
+
+        // Read indices array
+        var indicesLen = reader.ReadUInt64();
+        var colIndices = new int[indicesLen];
+        for (int i = 0; i < (int)indicesLen; i++)
+            colIndices[i] = (int)reader.ReadUInt32();
+
+        // Read data array
+        var dataLen = reader.ReadUInt64();
+        var values = new double[dataLen];
+        for (int i = 0; i < (int)dataLen; i++)
+            values[i] = BitConverter.UInt64BitsToDouble(reader.ReadUInt64());
+
+        // Create matrix from CSR format
+        var matrix = SparseMatrix<double>.FromCSR(m, n, rowPtr, colIndices, values);
+
+        return matrix;
     }
 
     private static void LoadSparseWeights(Stream stream, SparseMatrix<double> matrix)

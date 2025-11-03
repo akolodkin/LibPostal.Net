@@ -72,7 +72,7 @@ public class AddressParser
                 "See: https://github.com/openvenues/libpostal");
         }
 
-        return LoadFromDirectory(dataDir);
+        return LoadFromDirectory(parserDir);
     }
 
     /// <summary>

@@ -62,7 +62,7 @@ public static class AddressParserModelLoader
         if (File.Exists(vocabPath))
         {
             using var stream = File.OpenRead(vocabPath);
-            vocabulary = TrieLoader.LoadLibpostalTrie<uint>(stream);
+            vocabulary = DoubleArrayTrieLoader.LoadLibpostalTrie<uint>(stream);
         }
         else
         {
