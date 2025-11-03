@@ -203,6 +203,9 @@ public class AddressFeatureExtractor
             AddComponentPhraseFeatures(features, componentPhrase, context);
         }
 
+        // Add postal code context features (graph-based validation)
+        AddPostalCodeContextFeatures(features, tokenized, tokenIndex, context);
+
         // Add prefix/suffix features if no phrase match
         // This handles per-token prefix/suffix detection (like German "hinter-", "-straße")
         if (dictPhrase == null && token.Type == TokenType.Word && context.Model.Phrases != null)
@@ -480,6 +483,94 @@ public class AddressFeatureExtractor
             ComponentPhraseBoundary.WorldRegion => "world_region",
             _ => null
         };
+    }
+
+    /// <summary>
+    /// Adds postal code context features based on graph validation.
+    /// Validates that a postal code is geographically valid for an adjacent administrative region (city/state/country).
+    /// Based on libpostal's address_parser.c lines 1262-1319.
+    /// </summary>
+    /// <param name="features">The feature vector to add features to.</param>
+    /// <param name="tokenized">The tokenized string.</param>
+    /// <param name="tokenIndex">The current token index.</param>
+    /// <param name="context">The address parser context containing phrase memberships and graph.</param>
+    /// <remarks>
+    /// Features generated:
+    /// - "postcode have context" + "postcode have context:{code}" when validated
+    /// - "postcode no context:{code}" when postal code found but not validated
+    /// </remarks>
+    private void AddPostalCodeContextFeatures(
+        FeatureVector features,
+        TokenizedString tokenized,
+        int tokenIndex,
+        AddressParserContext context)
+    {
+        // Get postal code phrase at current token
+        var postalCodePhrase = context.GetPostalCodePhraseAt(tokenIndex);
+        if (postalCodePhrase == null)
+            return;
+
+        // Skip if no graph available
+        if (context.Model.PostalCodeGraph == null)
+            return;
+
+        uint postalCodeId = postalCodePhrase.PhraseId;
+        bool haveContext = false;
+
+        // Check PREVIOUS token for component phrase (before postal code phrase starts)
+        // This handles cases like "Brooklyn 11216" or "NY 10001"
+        int prevIndex = postalCodePhrase.StartIndex - 1;
+        if (prevIndex >= 0)
+        {
+            haveContext = CheckPostalCodeAdminContext(context, postalCodeId, prevIndex);
+        }
+
+        // Check NEXT token for component phrase (after postal code phrase ends)
+        // This handles cases like "11216 Brooklyn"
+        // Only check if we haven't found context yet
+        if (!haveContext)
+        {
+            int nextIndex = postalCodePhrase.StartIndex + postalCodePhrase.Length;
+            if (nextIndex < tokenized.Count)
+            {
+                haveContext = CheckPostalCodeAdminContext(context, postalCodeId, nextIndex);
+            }
+        }
+
+        // Generate features
+        var word = tokenized[tokenIndex].Text.ToLowerInvariant();
+        if (haveContext)
+        {
+            // Postal code has valid administrative context
+            features.Add("postcode have context");
+            features.Add($"postcode have context:{word}");
+        }
+        else
+        {
+            // Postal code found but no valid administrative context
+            features.Add($"postcode no context:{word}");
+        }
+    }
+
+    /// <summary>
+    /// Checks if a postal code has valid context with an administrative region at the specified token index.
+    /// </summary>
+    /// <param name="context">The address parser context.</param>
+    /// <param name="postalCodeId">The postal code phrase ID.</param>
+    /// <param name="tokenIndex">The token index to check for a component phrase.</param>
+    /// <returns>True if the postal code is valid for the administrative region; otherwise, false.</returns>
+    private static bool CheckPostalCodeAdminContext(
+        AddressParserContext context,
+        uint postalCodeId,
+        int tokenIndex)
+    {
+        var adminPhrase = context.GetComponentPhraseAt(tokenIndex);
+        if (adminPhrase != null)
+        {
+            uint adminId = adminPhrase.PhraseId;
+            return context.Model.PostalCodeGraph!.HasEdge((int)postalCodeId, (int)adminId);
+        }
+        return false;
     }
 
     /// <summary>
